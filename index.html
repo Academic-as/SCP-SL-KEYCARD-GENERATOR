@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="Academic.png" type="image/png">
+  <title>Генератор ключ-карт SCP:SL 14.1+</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-main: #0b0d10;
+      --bg-panel: rgba(18, 22, 28, 0.96);
+      --bg-input: #141a21;
+      --bg-input-hover: #1b232d;
+      --border: #2f3946;
+      --border-light: #556273;
+      --accent: #ff9f1c;
+      --accent-hover: #ffb347;
+      --danger: #d62828;
+      --text-main: #f5f7fa;
+      --text-secondary: #8d99a8;
+      --shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      --transition: all 0.18s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(255, 159, 28, 0.08), transparent 40%),
+        linear-gradient(to bottom, rgba(255,255,255,0.02), transparent),
+        #07090c;
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 980px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border-radius: 4px;
+      backdrop-filter: blur(6px);
+    }
+
+    .top-line {
+      height: 5px;
+      width: 100%;
+      background: linear-gradient(90deg, #ff9f1c, #ffca6a, #ff9f1c);
+      box-shadow: 0 0 15px rgba(255, 159, 28, 0.4);
+    }
+
+    .header {
+      padding: 30px 35px 25px;
+      border-bottom: 1px solid var(--border);
+      background:
+        linear-gradient(to right, rgba(255,159,28,0.07), transparent 60%),
+        rgba(255,255,255,0.01);
+      position: relative;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header::after {
+      content: "SCP FOUNDATION";
+      position: absolute;
+      top: 18px;
+      right: 25px;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.08);
+      font-weight: 700;
+    }
+
+    .header h1 {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      text-shadow: 0 0 8px rgba(255,255,255,0.08);
+    }
+
+    .header h1 span {
+      color: var(--accent);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 15px;
+      letter-spacing: 1px;
+    }
+
+    .content {
+      padding: 35px;
+    }
+
+    .section-title {
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      box-shadow: 0 0 12px rgba(255,159,28,0.4);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    .form-control {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-main);
+      padding: 0 14px;
+      font-size: 16px;
+      font-family: 'Rajdhani', sans-serif;
+      transition: var(--transition);
+      border-radius: 2px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control:hover {
+      background: var(--bg-input-hover);
+      border-color: var(--border-light);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(255, 159, 28, 0.5),
+                  0 0 12px rgba(255, 159, 28, 0.15);
+      background: var(--bg-input-hover);
+    }
+
+    select.form-control {
+      cursor: pointer;
+    }
+
+    .color-picker-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .color-picker-group input[type="color"] {
+      width: 50px;
+      height: 48px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .color-picker-group input[type="text"] {
+      flex: 1;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 18px;
+      margin-top: 35px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 220px;
+      height: 54px;
+      border: 1px solid var(--border-light);
+      background: linear-gradient(to bottom, #202834, #131920);
+      color: var(--text-main);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transition: 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 20px rgba(255, 159, 28, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(to bottom, #2a313c, #181d25);
+    }
+
+    .btn-warning {
+      background: linear-gradient(to bottom, #30281b, #1c1710);
+    }
+
+    #output-box {
+      margin-top: 30px;
+      min-height: 140px;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(rgba(255,255,255,0.015), transparent),
+        #0e1318;
+      padding: 18px;
+      font-family: Consolas, monospace;
+      color: #d8e2f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-y: auto;
+      border-left: 4px solid var(--accent);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.45);
+    }
+
+    .terminal-label {
+      display: inline-block;
+      margin-bottom: 12px;
+      color: var(--accent);
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      color: rgba(255,255,255,0.22);
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+
+      .content {
+        padding: 22px;
+      }
+
+      .header {
+        padding: 24px 22px;
+      }
+
+      .header h1 {
+        font-size: 26px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+    /* Toast / notification */
+    #toast-container {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      min-width: 240px;
+      max-width: 360px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 220ms ease, transform 220ms ease;
+      pointer-events: auto;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success { background: linear-gradient(90deg,#2ea04a,#19904a); }
+    .toast.error { background: linear-gradient(90deg,#c14444,#9b2b2b); }
+    .toast.info { background: linear-gradient(90deg,#2b6fbf,#1f6feb); }
+    .lang-switch {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-left: 10px;
+    }
+
+    .lang-btn {
+      background: rgba(6,8,10,0.75);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.95);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .lang-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 10px rgba(255,159,28,0.06);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-line"></div>
+
+    <div class="header">
+      <div class="header-row">
+        <h1>SCP:SL <span>KEYCARD GENERATOR</span></h1>
+        <div class="lang-switch">
+          <button id="btn-lang-ru" class="lang-btn active" aria-pressed="true">RU</button>
+          <button id="btn-lang-en" class="lang-btn" aria-pressed="false">EN</button>
+        </div>
+      </div>
+      <div class="subtitle">SECURE ACCESS MANAGEMENT SYSTEM • VERSION 14.1+</div>
+    </div>
+
+    <div class="content">
+      <div class="section-title" data-i18n="section.basic">Основные параметры</div>
+
+      <div class="form-group" style="margin-bottom: 22px;">
+        <label for="keycard-type" class="required" data-i18n="label.type">Тип ключ-карты</label>
+        <select id="keycard-type" class="form-control">
+          <option value="normal" selected data-i18n="option.type.normal">Обычная</option>
+          <option value="admin" data-i18n="option.type.admin">Админская</option>
+          <option value="taskforce" data-i18n="option.type.taskforce">Оперативника</option>
+          <option value="metal" data-i18n="option.type.metal">Металлическая</option>
+        </select>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="player-id" class="required" data-i18n="label.playerId">ID игрока</label>
+          <input type="text" id="player-id" class="form-control" data-i18n-placeholder="placeholder.playerId" placeholder="12345" maxlength="5" pattern="\d{1,5}" inputmode="numeric">
+        </div>
+
+        <div class="form-group">
+          <label for="inventory-name" class="required" data-i18n="label.inventoryName">Название в инвентаре</label>
+          <input type="text" id="inventory-name" class="form-control" data-i18n-placeholder="placeholder.inventoryName" placeholder="Ключ-карта охраны">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="position" data-i18n="label.position">Должность</label>
+          <input type="text" id="position" class="form-control" data-i18n-placeholder="placeholder.position" placeholder="Охранник">
+        </div>
+
+        <div class="form-group">
+          <label for="keycard-name" class="required" data-i18n="label.keycardName">Имя на ключ-карте</label>
+          <input type="text" id="keycard-name" class="form-control" data-i18n-placeholder="placeholder.keycardName" placeholder="John Doe">
+        </div>
+      </div>
+
+      <div class="form-grid" id="serial-circle-row">
+        <div class="form-group">
+          <label for="serial-number" data-i18n="label.serialNumber">Серийный номер</label>
+          <input type="text" id="serial-number" class="form-control" data-i18n-placeholder="placeholder.serialNumber" placeholder="Автогенерация" maxlength="10">
+        </div>
+
+        <div class="form-group">
+          <label for="circle-count" data-i18n="label.circleCount">Количество кружков</label>
+          <select id="circle-count" class="form-control">
+            <option value="0" data-i18n="option.circle.0">0 кружков</option>
+            <option value="1" data-i18n="option.circle.1">1 кружок</option>
+            <option value="2" data-i18n="option.circle.2">2 кружка</option>
+            <option value="3" data-i18n="option.circle.3">3 кружка</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 35px;" data-i18n="section.accessLevels">Уровни доступа</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="scp-access" data-i18n="label.scpAccess">SCP доступ</label>
+          <select id="scp-access" class="form-control">
+            <option value="0" data-i18n="option.scp.0">0 (Никакой)</option>
+            <option value="1" data-i18n="option.scp.1">1 (Безопасный)</option>
+            <option value="2" data-i18n="option.scp.2">2 (Евклид)</option>
+            <option value="3" data-i18n="option.scp.3">3 (Кетер)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="weapon-access" data-i18n="label.weaponAccess">Оружие доступ</label>
+          <select id="weapon-access" class="form-control">
+            <option value="0" data-i18n="option.weapon.0">0 (Нож)</option>
+            <option value="1" data-i18n="option.weapon.1">1 (Пистолет)</option>
+            <option value="2" data-i18n="option.weapon.2">2 (Автомат)</option>
+            <option value="3" data-i18n="option.weapon.3">3 (Micro HID)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="admin-access" data-i18n="label.adminAccess">Админ доступ</label>
+          <select id="admin-access" class="form-control">
+            <option value="0" data-i18n="option.admin.0">0 (Туалет)</option>
+            <option value="1" data-i18n="option.admin.1">1 (КПП)</option>
+            <option value="2" data-i18n="option.admin.2">2 (Гермоворота)</option>
+            <option value="3" data-i18n="option.admin.3">3 (Каб. Директора)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top: 35px;" data-i18n="section.customization">Кастомизация</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="circle-color" data-i18n="label.circleColor">Цвет кружков</label>
+          <div class="color-picker-group">
+            <input type="color" id="circle-color-picker" value="#008000">
+            <input type="text" id="circle-hex-code" class="form-control" placeholder="#008000" maxlength="7">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="border-color" data-i18n="label.borderColor">Цвет обводки</label>
+          <div class="color-picker-group">
+            <input type="color" id="border-color-picker" value="#008000">
+            <input type="text" id="border-hex-code" class="form-control" placeholder="#008000" maxlength="7">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="label-color" data-i18n="label.labelColor">Цвет текста</label>
+          <div class="color-picker-group">
+            <input type="color" id="label-color-picker" value="#008000">
+            <input type="text" id="label-hex-code" class="form-control" placeholder="#008000" maxlength="7">
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="btn-generate" class="btn btn-primary" data-i18n="btn.generate">Сгенерировать</button>
+        <button id="btn-copy" class="btn btn-warning" data-i18n="btn.copy">Скопировать</button>
+      </div>
+
+      <div id="output-box">
+        <span class="terminal-label" data-i18n="output.terminal">OUTPUT TERMINAL</span>
+      </div>
+
+      <div class="footer-note">
+        FOUNDATION DATABASE • AUTHORIZED PERSONNEL ONLY
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" aria-live="polite"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple i18n translations
+        const i18n = {
+          ru: {
+            'section.basic': 'Основные параметры',
+            'label.type': 'Тип ключ-карты',
+            'option.type.normal': 'Обычная',
+            'option.type.admin': 'Админская',
+            'option.type.taskforce': 'Оперативника',
+            'option.type.metal': 'Металлическая',
+            'label.playerId': 'ID игрока',
+            'placeholder.playerId': '12345',
+            'label.inventoryName': 'Название в инвентаре',
+            'placeholder.inventoryName': 'Ключ-карта охраны',
+            'label.position': 'Должность',
+            'placeholder.position': 'Охранник',
+            'label.keycardName': 'Имя на ключ-карте',
+            'placeholder.keycardName': 'John Doe',
+            'label.serialNumber': 'Серийный номер',
+            'placeholder.serialNumber': 'Автогенерация',
+            'label.circleCount': 'Количество кружков',
+            'option.circle.0': '0 кружков',
+            'option.circle.1': '1 кружок',
+            'option.circle.2': '2 кружка',
+            'option.circle.3': '3 кружка',
+            'section.accessLevels': 'Уровни доступа',
+            'label.scpAccess': 'SCP доступ',
+            'option.scp.0': '0 (Никакой)',
+            'option.scp.1': '1 (Безопасный)',
+            'option.scp.2': '2 (Евклид)',
+            'option.scp.3': '3 (Кетер)',
+            'label.weaponAccess': 'Оружие доступ',
+            'option.weapon.0': '0 (Нож)',
+            'option.weapon.1': '1 (Пистолет)',
+            'option.weapon.2': '2 (Автомат)',
+            'option.weapon.3': '3 (Micro HID)',
+            'label.adminAccess': 'Админ доступ',
+            'option.admin.0': '0 (Туалет)',
+            'option.admin.1': '1 (КПП)',
+            'option.admin.2': '2 (Гермоворота)',
+            'option.admin.3': '3 (Каб. Директора)',
+            'section.customization': 'Кастомизация',
+            'label.circleColor': 'Цвет кружков',
+            'label.borderColor': 'Цвет обводки',
+            'label.labelColor': 'Цвет текста',
+            'btn.generate': 'Сгенерировать',
+            'btn.copy': 'Скопировать',
+            'output.terminal': 'OUTPUT TERMINAL',
+            'toast.playerIdError': 'Введите корректный ID игрока (1-5 цифр)',
+            'toast.inventoryError': 'Введите название в инвентаре',
+            'toast.keycardNameError': 'Введите имя на ключ-карте',
+            'toast.serialError': 'Введите серийный номер',
+            'toast.generateFirst': 'Сначала сгенерируйте команду',
+            'toast.copySuccess': 'Команда скопирована в буфер обмена!',
+            'toast.copyFail': 'Не удалось скопировать команду'
+          },
+          en: {
+            'section.basic': 'General Parameters',
+            'label.type': 'Keycard Type',
+            'option.type.normal': 'Normal',
+            'option.type.admin': 'Admin',
+            'option.type.taskforce': 'Taskforce',
+            'option.type.metal': 'Metal',
+            'label.playerId': 'Player ID',
+            'placeholder.playerId': '12345',
+            'label.inventoryName': 'Inventory Name',
+            'placeholder.inventoryName': 'Security Keycard',
+            'label.position': 'Position',
+            'placeholder.position': 'Security',
+            'label.keycardName': 'Name on Keycard',
+            'placeholder.keycardName': 'John Doe',
+            'label.serialNumber': 'Serial Number',
+            'placeholder.serialNumber': 'Auto-generate',
+            'label.circleCount': 'Circle Count',
+            'option.circle.0': '0 circles',
+            'option.circle.1': '1 circle',
+            'option.circle.2': '2 circles',
+            'option.circle.3': '3 circles',
+            'section.accessLevels': 'Access Levels',
+            'label.scpAccess': 'SCP Access',
+            'option.scp.0': '0 (None)',
+            'option.scp.1': '1 (Safe)',
+            'option.scp.2': '2 (Euclid)',
+            'option.scp.3': '3 (Keter)',
+            'label.weaponAccess': 'Weapon Access',
+            'option.weapon.0': '0 (Knife)',
+            'option.weapon.1': '1 (Pistol)',
+            'option.weapon.2': '2 (Automatic)',
+            'option.weapon.3': '3 (Micro HID)',
+            'label.adminAccess': 'Admin Access',
+            'option.admin.0': '0 (Toilet)',
+            'option.admin.1': '1 (Checkpoint)',
+            'option.admin.2': '2 (Airlock)',
+            'option.admin.3': '3 (Director Office)',
+            'section.customization': 'Customization',
+            'label.circleColor': 'Circle Color',
+            'label.borderColor': 'Border Color',
+            'label.labelColor': 'Text Color',
+            'btn.generate': 'Generate',
+            'btn.copy': 'Copy',
+            'output.terminal': 'OUTPUT TERMINAL',
+            'toast.playerIdError': 'Enter valid Player ID (1-5 digits)',
+            'toast.inventoryError': 'Enter inventory name',
+            'toast.keycardNameError': 'Enter name on keycard',
+            'toast.serialError': 'Enter serial number',
+            'toast.generateFirst': 'Generate a command first',
+            'toast.copySuccess': 'Command copied to clipboard!',
+            'toast.copyFail': 'Failed to copy command'
+          }
+        };
+
+        let currentLang = 'ru';
+
+        const t = (key) => (i18n[currentLang] && i18n[currentLang][key]) || key;
+
+        const applyTranslations = (lang) => {
+          currentLang = lang;
+          document.documentElement.lang = lang === 'ru' ? 'ru' : 'en';
+
+          document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (key) el.textContent = t(key);
+          });
+
+          document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (key) el.placeholder = t(key);
+          });
+
+          // update active state on language buttons
+          document.getElementById('btn-lang-ru').classList.toggle('active', lang === 'ru');
+          document.getElementById('btn-lang-en').classList.toggle('active', lang === 'en');
+          document.getElementById('btn-lang-ru').setAttribute('aria-pressed', lang === 'ru');
+          document.getElementById('btn-lang-en').setAttribute('aria-pressed', lang === 'en');
+        };
+
+        document.getElementById('btn-lang-ru').addEventListener('click', () => applyTranslations('ru'));
+        document.getElementById('btn-lang-en').addEventListener('click', () => applyTranslations('en'));
+
+        // NOTE: persistence removed — do not save data across reloads or restarts
+
+        // Показывать уведомления на странице (toast)
+        const showNotification = (message, type = 'info', timeout = 3000) => {
+          const container = document.getElementById('toast-container');
+          if (!container) return;
+
+          const toast = document.createElement('div');
+          toast.className = `toast ${type}`;
+          toast.textContent = message;
+
+          container.appendChild(toast);
+
+          // Force reflow to enable transition
+          void toast.offsetWidth;
+          toast.classList.add('show');
+
+          // Auto remove
+          setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => container.removeChild(toast), 240);
+          }, timeout);
+        };
+
+      // Генерация случайного серийного номера
+      const generateSerialNumber = () => {
+        return Math.floor(1000000000 + Math.random() * 9000000000).toString().slice(0, 10);
+      };
+
+      // Обновление видимости полей
+      const updateVisibility = () => {
+        const type = document.getElementById('keycard-type').value;
+        const serialCircleRow = document.getElementById('serial-circle-row');
+        const serialInput = document.getElementById('serial-number');
+
+        if (type === 'normal' || type === 'admin') {
+          serialCircleRow.style.display = 'none';
+        } else {
+          serialCircleRow.style.display = 'grid';
+
+          if (!serialInput.value) {
+            serialInput.value = generateSerialNumber();
+          }
+        }
+
+        setDefaultColors(type);
+      };
+
+      // Цвета по умолчанию
+      const setDefaultColors = (type) => {
+        const colors = {
+          'normal': { circle: '#008000', border: '#008000', label: '#008000' },
+          'admin': { circle: '#ff0000', border: '#ff0000', label: '#ff0000' },
+          'taskforce': { circle: '#0000ff', border: '#0000ff', label: '#ffffff' },
+          'metal': { circle: '#ffa500', border: '#ffa500', label: '#000000' }
+        };
+
+        if (colors[type]) {
+          document.getElementById('circle-color-picker').value = colors[type].circle;
+          document.getElementById('circle-hex-code').value = colors[type].circle;
+
+          document.getElementById('border-color-picker').value = colors[type].border;
+          document.getElementById('border-hex-code').value = colors[type].border;
+
+          document.getElementById('label-color-picker').value = colors[type].label;
+          document.getElementById('label-hex-code').value = colors[type].label;
+        }
+      };
+
+      // Синхронизация цветов
+      const syncColorInputs = (pickerId, hexId) => {
+        const picker = document.getElementById(pickerId);
+        const hexInput = document.getElementById(hexId);
+
+        picker.addEventListener('input', () => {
+          hexInput.value = picker.value;
+        });
+
+        hexInput.addEventListener('input', () => {
+          if (/^#[0-9A-F]{6}$/i.test(hexInput.value)) {
+            picker.value = hexInput.value;
+          }
+        });
+      };
+
+      // Инициализация
+      syncColorInputs('circle-color-picker', 'circle-hex-code');
+      syncColorInputs('border-color-picker', 'border-hex-code');
+      syncColorInputs('label-color-picker', 'label-hex-code');
+
+      document.getElementById('keycard-type').addEventListener('change', updateVisibility);
+
+      document.getElementById('serial-number').addEventListener('focus', function() {
+        if (!this.value) {
+          this.value = generateSerialNumber();
+        }
+      });
+
+      // Генерация команды
+      document.getElementById('btn-generate').addEventListener('click', () => {
+        const type = document.getElementById('keycard-type').value;
+        const idPlayer = document.getElementById('player-id').value.trim();
+        const inventoryName = document.getElementById('inventory-name').value.trim().replace(/\s+/g, '_');
+        const position = document.getElementById('position').value.trim().replace(/\s+/g, '_');
+        const keycardName = document.getElementById('keycard-name').value.trim().replace(/\s+/g, '_');
+        const scpAccess = document.getElementById('scp-access').value;
+        const weaponAccess = document.getElementById('weapon-access').value;
+        const adminAccess = document.getElementById('admin-access').value;
+        const circleColor = document.getElementById('circle-hex-code').value.toUpperCase();
+        const borderColor = document.getElementById('border-hex-code').value.toUpperCase();
+        const labelColor = document.getElementById('label-hex-code').value.toUpperCase();
+        const serialNumber = document.getElementById('serial-number').value.trim();
+        const circleCount = document.getElementById('circle-count').value;
+
+        // Валидация
+        if (!idPlayer || !/^\d{1,5}$/.test(idPlayer)) {
+          showNotification(t('toast.playerIdError'), 'error');
+          document.getElementById('player-id').focus();
+          return;
+        }
+
+        if (!inventoryName) {
+          showNotification(t('toast.inventoryError'), 'error');
+          document.getElementById('inventory-name').focus();
+          return;
+        }
+
+        if (!keycardName) {
+          showNotification(t('toast.keycardNameError'), 'error');
+          document.getElementById('keycard-name').focus();
+          return;
+        }
+
+        let command = '';
+        const circleCountMap = {
+          '0': '0',
+          '1': '3',
+          '2': '2',
+          '3': '1'
+        };
+
+        switch (type) {
+          case 'normal':
+            command = `ckeycard ${idPlayer} KeycardCustomSite02 ${inventoryName} ${scpAccess} ${weaponAccess} ${adminAccess} ${circleColor} ${borderColor} ${position} ${labelColor} ${keycardName} 1`;
+            break;
+
+          case 'admin':
+            command = `ckeycard ${idPlayer} keycardcustommanagement ${inventoryName} ${scpAccess} ${weaponAccess} ${adminAccess} ${circleColor} ${borderColor} ${position} ${labelColor} ${keycardName} 1`;
+            break;
+
+          case 'metal':
+              if (!serialNumber) {
+                showNotification(t('toast.serialError'), 'error');
+                document.getElementById('serial-number').focus();
+                return;
+              }
+
+            command = `ckeycard ${idPlayer} KeycardCustomMetalCase ${inventoryName} ${scpAccess} ${weaponAccess} ${adminAccess} ${circleColor} ${borderColor} ${position} ${labelColor} ${keycardName} ${serialNumber}1`;
+            break;
+
+          case 'taskforce':
+            if (!serialNumber) {
+              showNotification(t('toast.serialError'), 'error');
+              document.getElementById('serial-number').focus();
+              return;
+            }
+
+            command = `ckeycard ${idPlayer} keycardcustomtaskforce ${inventoryName} ${scpAccess} ${weaponAccess} ${adminAccess} ${circleColor} ${borderColor} ${keycardName} ${serialNumber} ${circleCountMap[circleCount] || '0'}`;
+            break;
+
+          default:
+            command = t('btn.generate');
+        }
+
+        document.getElementById('output-box').innerHTML = `
+          <span class="terminal-label">OUTPUT TERMINAL</span><br>
+          ${command}
+        `;
+      });
+
+      // Копирование
+      document.getElementById('btn-copy').addEventListener('click', () => {
+        const output = document.getElementById('output-box').innerText
+          .replace('OUTPUT TERMINAL', '')
+          .trim();
+
+        if (!output) {
+          showNotification(t('toast.generateFirst'), 'error');
+          return;
+        }
+
+        navigator.clipboard.writeText(output).then(() => {
+          showNotification(t('toast.copySuccess'), 'success');
+        }).catch(() => {
+          showNotification(t('toast.copyFail'), 'error');
+        });
+      });
+
+      // Инициализировать видимость и цвета без загрузки сохранённых данных
+      updateVisibility();
+
+      // Apply initial translations
+      applyTranslations(currentLang);
+    });
+  </script>
+</body>
+</html>
+
